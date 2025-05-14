@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Attempts</h5>
+                <h2 class="card-text">{{ stats.total_attempts }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h5 class="card-title">Failed Attempts</h5>
+                <h2 class="card-text">{{ stats.failed_attempts }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <h5 class="card-title">Unique IPs</h5>
+                <h2 class="card-text">{{ stats.unique_ips }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title">Recent Failures (1h)</h5>
+                <h2 class="card-text">{{ stats.recent_failures }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Attack Types</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="attackTypesChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user"></i> Common Usernames</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for username, count in stats.common_usernames %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ username }}
+                        <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-key"></i> Common Passwords</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for password, count in stats.common_passwords %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ password }}
+                        <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-shield-alt"></i> Attack Attempts</h4>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="exportToCSV()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>IP Address</th>
+                                <th>Location</th>
+                                <th>Username</th>
+                                <th>Password</th>
+                                <th>Attack Type</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in attempts %}
+                            <tr>
+                                <td>{{ attempt.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ attempt.ip_address }}</span>
+                                </td>
+                                <td>
+                                    {% if attempt.geo_location %}
+                                    {% set geo = attempt.geo_location|fromjson %}
+                                    {{ geo.get('country', 'Unknown') }}
+                                    {% else %}
+                                    Unknown
+                                    {% endif %}
+                                </td>
+                                <td>{{ attempt.username }}</td>
+                                <td><code>{{ attempt.password }}</code></td>
+                                <td>
+                                    <span
+                                        class="badge bg-{{ 'warning' if attempt.attack_type != 'Unknown' else 'secondary' }}">
+                                        {{ attempt.attack_type }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info"
+                                        onclick='showDetails({{ attempt.headers|tojson }})'>
+                                        <i class="fas fa-info-circle"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal fade" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Attack Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="detailsContent" class="bg-light p-3"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize charts
+    document.addEventListener('DOMContentLoaded', function () {
+        // Attack Types Chart
+        const attackTypes = {{ dict(stats.attack_types) | tojson
+    }};
+    const ctx = document.getElementById('attackTypesChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(attackTypes),
+            datasets: [{
+                data: Object.values(attackTypes),
+                backgroundColor: [
+                    '#ff6384',
+                    '#36a2eb',
+                    '#ffce56',
+                    '#4bc0c0',
+                    '#9966ff'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    });
+
+    // Show attack details
+    function showDetails(headers) {
+        const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+        document.getElementById('detailsContent').textContent = JSON.stringify(headers, null, 2);
+        modal.show();
+    }
+
+    // Export to CSV
+    function exportToCSV() {
+        const table = document.querySelector('table');
+        const rows = Array.from(table.querySelectorAll('tr'));
+        const csv = rows.map(row => {
+            const cells = Array.from(row.querySelectorAll('th, td'));
+            return cells.map(cell => `"${cell.textContent.trim()}"`).join(',');
+        }).join('\n');
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('href', url);
+        a.setAttribute('download', 'attack_attempts.csv');
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+</script>
+
+{% endblock %}

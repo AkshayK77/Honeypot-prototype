@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Error {{ error_code }}
+                </h4>
+            </div>
+            <div class="card-body text-center">
+                <h5 class="card-title">{{ error_message }}</h5>
+                {% if retry_after > 0 %}
+                <p class="card-text">
+                    Please wait <span id="countdown" class="text-danger fw-bold">{{ retry_after }}</span> seconds before
+                    trying again.
+                </p>
+                <div class="progress mb-3">
+                    <div id="progress-bar" class="progress-bar bg-danger" role="progressbar" style="width: 100%"></div>
+                </div>
+                {% endif %}
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="fas fa-home"></i> Back to Home
+                    </a>
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+                <small>
+                    <i class="fas fa-info-circle"></i>
+                    This is a security measure to prevent automated attacks.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        {% if retry_after > 0 %}
+        var timeLeft = parseInt("{{ retry_after }}");
+        var countdownElement = document.getElementById('countdown');
+        var progressBar = document.getElementById('progress-bar');
+        var totalTime = timeLeft;
+
+        var countdown = setInterval(function () {
+            timeLeft--;
+            countdownElement.textContent = timeLeft;
+
+            // Update progress bar
+            var percentLeft = (timeLeft / totalTime) * 100;
+            progressBar.style.width = percentLeft + '%';
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                window.location.href = "{{ url_for('login') }}";
+            }
+        }, 1000);
+        {% endif %}
+
+        {% if auto_refresh is defined and auto_refresh %}
+        // For CSRF errors, refresh the page after a short delay
+        setTimeout(function () {
+            window.location.reload();
+        }, 2000);
+        {% endif %}
+    });
+</script>
+{% endblock %}

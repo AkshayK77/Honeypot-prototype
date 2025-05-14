@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4 mb-4">
+            <i class="fas fa-shield-alt text-primary"></i>
+            Brute Force Attack Simulator
+        </h1>
+        <div class="card shadow">
+            <div class="card-body">
+                <h5 class="card-title">Welcome to the Security Testing Environment</h5>
+                <p class="card-text">
+                    This simulator demonstrates common brute force attack patterns and defense mechanisms including:
+                </p>
+                <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item">
+                        <i class="fas fa-lock text-warning"></i> Rate limiting
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-user-lock text-danger"></i> Account lockout
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-chart-line text-success"></i> Attack monitoring
+                    </li>
+                    <li class="list-group-item">
+                        <i class="fas fa-history text-info"></i> Attempt logging
+                    </li>
+                </ul>
+                <div class="d-grid gap-2 col-6 mx-auto">
+                    <a href="{{ url_for('login') }}" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Try to Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

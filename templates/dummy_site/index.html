@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold">Welcome to SecureBank</h1>
+            <p class="lead text-muted">Your Trusted Online Banking Partner</p>
+            <p class="mb-4">Experience secure, reliable, and convenient banking services from anywhere in the world.</p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <a href="{{ url_for('dummy_login') }}" class="btn btn-primary btn-lg px-4 me-md-2">Login to Online
+                    Banking</a>
+                <button class="btn btn-outline-secondary btn-lg px-4">Learn More</button>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <img src="https://placehold.co/600x400" class="img-fluid rounded shadow" alt="Online Banking">
+        </div>
+    </div>
+
+    <div class="row mt-5 pt-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Secure Banking</h5>
+                    <p class="card-text">Bank with confidence knowing your data is protected by industry-leading
+                        security.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-mobile-alt fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Mobile Banking</h5>
+                    <p class="card-text">Access your accounts anytime, anywhere with our mobile banking solution.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-headset fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">24/7 Support</h5>
+                    <p class="card-text">Our dedicated support team is always here to help you with your banking needs.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-light mt-5">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-md-8 mx-auto text-center">
+                <h2>Ready to get started?</h2>
+                <p class="lead text-muted">Join thousands of satisfied customers who trust SecureBank</p>
+                <a href="{{ url_for('dummy_login') }}" class="btn btn-primary btn-lg mt-3">Access Your Account</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
