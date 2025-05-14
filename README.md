@@ -1,4 +1,4 @@
-# Brute Force Prevention Simulation
+# Basic implementation of a Honeypot
 
 A sophisticated honeypot system that simulates a banking website to detect, analyze, and prevent brute force attacks. This project demonstrates advanced security concepts and attack pattern recognition.
 
